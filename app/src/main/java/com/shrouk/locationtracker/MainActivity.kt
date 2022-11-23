@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
 
         getlocation.setOnClickListener {
-
+getMyLocation()
             startTrackerService()
         }
     }

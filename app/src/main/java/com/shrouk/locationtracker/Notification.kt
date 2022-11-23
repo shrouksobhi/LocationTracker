@@ -1,10 +1,12 @@
 package com.shrouk.locationtracker
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import android.widget.RemoteViews
@@ -16,6 +18,8 @@ private val NOTIFICATION_ID = 0
 
 fun NotificationManager.sendNotification(
     messageBody: String,
+    title: String,
+    bitmap:Int,
 
     applicationContext: Context
 ) {
@@ -29,20 +33,22 @@ fun NotificationManager.sendNotification(
         contentIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
-    val notificationLayout = RemoteViews(applicationContext.packageName, R.layout.notification)
-
+    val remoteViews = RemoteViews(applicationContext.packageName, R.layout.notification)
+    remoteViews.setImageViewResource(R.id.image, bitmap)
+    remoteViews.setTextViewText(R.id.title, title)
+    remoteViews.setTextViewText(R.id.message, messageBody)
     // Build the notification
     val builder = NotificationCompat.Builder(
         applicationContext,
         "123456"
     )
+
+
         .setSmallIcon(androidx.loader.R.drawable.notification_bg)
-        .setContentTitle("Your current Location : ")
-        .setContentText(messageBody)
         .setAutoCancel(false)
         .setOngoing(true)
-        .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-        .setCustomContentView(notificationLayout)
+        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        .setCustomContentView(remoteViews)
 
         .setPriority(NotificationCompat.PRIORITY_HIGH)
     //builder.addAction(com.google.android.material.R.drawable.notification_bg, "Details", contentPendingIntent)
@@ -50,6 +56,7 @@ fun NotificationManager.sendNotification(
     Log.e("TAG", "sendNotification: ")
     notify(NOTIFICATION_ID, builder.build())
 }
+
 
 /**
  * Cancels all notifications.

@@ -1,6 +1,7 @@
 package com.shrouk.locationtracker
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
@@ -9,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
@@ -16,6 +18,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -39,9 +42,9 @@ class LocationService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel(this)
+        requestLocationUpdate()
 
         Log.e("TAG", "onCreate: SERVICE  ")
-        requestLocationUpdate()
     }
 //    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 //        super.onStartCommand(intent, flags, startId)
@@ -100,18 +103,23 @@ class LocationService : Service() {
           NotificationManager::class.java
    ) as NotificationManager
             Log.e("TAG", "onReceive: $p1", )
-           notification.sendNotification(
-                "Your current location is : latitude $latitude " + ", longitude $longitude",
-               p0!!
+
+            notification.sendNotification(
+                "Latitude : $latitude " +"\n" +"Longitude : $longitude",
+               "Your current location is :",
+               R.drawable.map2,
+               p0
             )
             Log.e("TAG", "onReceive: $latitude $longitude", )
 
         }
+
     }
 
     override fun onDestroy() {
 
-            unregisterReceiver(broadcastReceiver)
+        unregisterReceiver(broadcastReceiver)
+       // LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
 
         super.onDestroy()
     }
