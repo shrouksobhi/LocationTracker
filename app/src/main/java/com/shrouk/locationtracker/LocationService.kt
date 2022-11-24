@@ -19,15 +19,18 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
+import java.util.concurrent.TimeUnit
 
 
 class LocationService : Service() {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
 
+    private lateinit var locationCallback: LocationCallback
+
+    private var currentLocation: Location? = null
 //    private lateinit var notification: NotificationManager
     private lateinit var locationManager: LocationManager
     var latitude: Double = 0.0
@@ -52,6 +55,81 @@ class LocationService : Service() {
 //    }
 
     fun requestLocationUpdate() {
+//        locationRequest = LocationRequest.create().apply {
+//            // Sets the desired interval for active location updates. This interval is inexact. You
+//            // may not receive updates at all if no location sources are available, or you may
+//            // receive them less frequently than requested. You may also receive updates more
+//            // frequently than requested if other applications are requesting location at a more
+//            // frequent interval.
+//            //
+//            // IMPORTANT NOTE: Apps running on Android 8.0 and higher devices (regardless of
+//            // targetSdkVersion) may receive updates less frequently than this interval when the app
+//            // is no longer in the foreground.
+//            interval = TimeUnit.SECONDS.toMillis(60)
+//
+//            // Sets the fastest rate for active location updates. This interval is exact, and your
+//            // application will never receive updates more frequently than this value.
+//            fastestInterval = TimeUnit.SECONDS.toMillis(30)
+//
+//            // Sets the maximum time when batched location updates are delivered. Updates may be
+//            // delivered sooner than this interval.
+//            maxWaitTime = TimeUnit.MINUTES.toMillis(2)
+//
+//            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+//        }
+//
+//        locationCallback = object : LocationCallback() {
+//            override fun onLocationResult(locationResult: LocationResult) {
+//                super.onLocationResult(locationResult)
+//
+//                currentLocation = locationResult.lastLocation
+////
+////                val intent = Intent(ACTION_FOREGROUND_ONLY_LOCATION_BROADCAST)
+////                intent.putExtra(EXTRA_LOCATION, currentLocation)
+////                LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
+////
+////                // Updates notification content if this service is running as a foreground
+////                // service.
+////                if (serviceRunningInForeground) {
+////                    notificationManager.notify(
+////                        NOTIFICATION_ID,
+////                        generateNotification(currentLocation))
+////                }
+//                latitude=currentLocation!!.latitude
+//                longitude=currentLocation!!.longitude
+//                   Log.e("TAG", "requestLocationUpdate: $latitude $longitude")
+//
+//                var permission = ContextCompat.checkSelfPermission(
+//                    applicationContext,
+//                    Manifest.permission.ACCESS_FINE_LOCATION
+//                )
+//                if (permission == PackageManager.PERMISSION_GRANTED) {
+//                    // Request location updates and when an update is
+//                    // received, store the location in Firebase
+//                    var proximitys = "ACTION"
+//                    var filter: IntentFilter = IntentFilter(proximitys)
+//                    registerReceiver(broadcastReceiver, filter)
+//                    var intent: Intent = Intent(proximitys)
+//                    val proximityIntent: PendingIntent
+//                    proximityIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                        PendingIntent.getBroadcast(
+//                            applicationContext, 0,
+//                            intent, PendingIntent.FLAG_MUTABLE
+//                        )
+//                        // Create the persistent notification
+//                    } else {
+//                        PendingIntent.getBroadcast(
+//                            applicationContext, 0,
+//                            intent, PendingIntent.FLAG_CANCEL_CURRENT
+//                        )
+//                    }
+//                    fusedLocationProviderClient.requestLocationUpdates(
+//                        locationRequest,
+//                        proximityIntent
+//                    )
+//
+//
+//                }
         var request: LocationRequest = LocationRequest.create()
         request.setInterval(1000)
         request.setFastestInterval(9000)
@@ -92,8 +170,9 @@ class LocationService : Service() {
 
 
             }
-        }
-    }
+         }
+       }
+
 
     var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
 
@@ -118,8 +197,8 @@ class LocationService : Service() {
 
     override fun onDestroy() {
 
-        unregisterReceiver(broadcastReceiver)
-       // LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+      //  unregisterReceiver(broadcastReceiver)
+      LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
 
         super.onDestroy()
     }
